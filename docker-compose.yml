@@ -1,0 +1,50 @@
+services:
+  # =========================
+  # SERVICIO BACKEND
+  # =========================
+  backend:
+    build: .
+    container_name: backend-api
+    restart: always
+    ports:
+      - "3000:3000"
+    environment:
+      PORT: 3000
+      DB_HOST: mysql
+      DB_USER: root
+      DB_PASSWORD: root
+      DB_NAME: proyecto_db
+      DB_PORT: 3306
+    depends_on:
+      - mysql
+    networks:
+      - app-network
+
+  # =========================
+  # SERVICIO MYSQL
+  # =========================
+  mysql:
+    # MODIFICADO: Usamos el nombre de la imagen que construimos localmente
+    image: kamilox25/data-ev2:latest 
+    container_name: mysql-db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: proyecto_db
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      # IMPORTANTE: Asegúrate que esta ruta ./data-ev2 exista o quítala 
+      # si ya metiste los scripts dentro del Dockerfile de Data
+      - ./data-ev2:/docker-entrypoint-initdb.d:ro 
+    networks:
+      - app-network
+
+volumes:
+  mysql_data:
+
+networks:
+  app-network:
+    # La definimos como externa porque ya la creamos con el comando manual
+    external: true

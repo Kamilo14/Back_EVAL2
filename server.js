@@ -12,13 +12,20 @@ const PORT = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json());
 
+// Middleware global para forzar charset UTF-8 en todas las respuestas JSON
+app.use((req, res, next) => {
+    res.setHeader('Content-Type', 'application/json; charset=utf-8');
+    next();
+});
+
 // Configuración de la conexión a la base de datos MySQL
 const dbConnection = mysql.createConnection({
     host: process.env.DB_HOST || 'localhost',
     user: process.env.DB_USER || 'root',
     password: process.env.DB_PASSWORD || '',
     database: process.env.DB_NAME || 'proyecto_db',
-    port: process.env.DB_PORT || 3306
+    port: process.env.DB_PORT || 3306,
+    charset: 'utf8mb4' // Asegura compatibilidad con caracteres especiales
 });
 
 // Conectar a la base de datos
