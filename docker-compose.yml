@@ -8,13 +8,8 @@ services:
     restart: always
     ports:
       - "3000:3000"
-    environment:
-      PORT: 3000
-      DB_HOST: mysql
-      DB_USER: root
-      DB_PASSWORD: root
-      DB_NAME: proyecto_db
-      DB_PORT: 3306
+    env_file:
+      - .env
     depends_on:
       - mysql
     networks:
@@ -24,20 +19,17 @@ services:
   # SERVICIO MYSQL
   # =========================
   mysql:
-    # MODIFICADO: Usamos el nombre de la imagen que construimos localmente
-    image: kamilox25/data-ev2:latest 
+    image: kamilox25/data-ev2:latest
     container_name: mysql-db
     restart: always
     environment:
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: proyecto_db
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+      MYSQL_DATABASE: ${DB_NAME}
     ports:
       - "3307:3306"
     volumes:
       - mysql_data:/var/lib/mysql
-      # IMPORTANTE: Asegúrate que esta ruta ./data-ev2 exista o quítala 
-      # si ya metiste los scripts dentro del Dockerfile de Data
-      - ./data-ev2:/docker-entrypoint-initdb.d:ro 
+      - ./data-ev2:/docker-entrypoint-initdb.d:ro
     networks:
       - app-network
 
