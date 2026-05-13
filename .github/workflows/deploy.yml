@@ -1,4 +1,5 @@
 name: Publicar imagen docker
+#Compatibilidad con Node 24 para acciones de JavaScript
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
