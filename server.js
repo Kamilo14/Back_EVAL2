@@ -18,23 +18,27 @@ app.use((req, res, next) => {
     next();
 });
 
-// Configuración de la conexión a la base de datos MySQL
-const dbConnection = mysql.createConnection({
+// Configuración del pool de conexiones a la base de datos MySQL
+const dbConnection = mysql.createPool({
     host: process.env.DB_HOST || 'localhost',
     user: process.env.DB_USER || 'root',
     password: process.env.DB_PASSWORD || '',
     database: process.env.DB_NAME || 'proyecto_db',
     port: process.env.DB_PORT || 3306,
-    charset: 'utf8mb4' // Asegura compatibilidad con caracteres especiales
+    charset: 'utf8mb4', // Asegura compatibilidad con caracteres especiales
+    waitForConnections: true,
+    connectionLimit: 10,
+    queueLimit: 0
 });
 
-// Conectar a la base de datos
-dbConnection.connect((err) => {
+// Verificar pool de conexiones
+dbConnection.getConnection((err, connection) => {
     if (err) {
         console.error('Error conectando a la base de datos:', err);
         return;
     }
-    console.log('Conectado exitosamente a la base de datos MySQL');
+    console.log('Pool de conexiones MySQL configurado exitosamente');
+    connection.release();
 });
 
 // Ruta de prueba para verificar que el servidor funciona
