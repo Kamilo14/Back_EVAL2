@@ -29,3 +29,26 @@ jobs:
           context: .
           push: true
           tags: ${{ secrets.DOCKER_USERNAME }}/back-ev2:latest
+
+      # --- DESPLIEGUE AUTOMÁTICO EN EC2 ---
+      # Este paso se conecta por SSH a tu instancia EC2 y actualiza el contenedor backend automáticamente.
+      # Requiere que configures los secretos EC2_HOST (IP o DNS), EC2_SSH_KEY (llave privada PEM), DOCKER_USERNAME y DOCKER_TOKEN en GitHub.
+      - name: Desplegar en EC2 vía SSH
+        uses: appleboy/ssh-action@v1.0.3  # Acción para ejecutar comandos SSH desde GitHub Actions
+        with:
+          host: ${{ secrets.EC2_HOST }}         # IP pública o DNS de tu EC2
+          username: ec2-user                    # Usuario por defecto en Amazon Linux
+          key: ${{ secrets.EC2_SSH_KEY }}       # Llave privada SSH (agrega como secreto en GitHub)
+          port: 22                              # Puerto SSH por defecto
+          script: |
+            # Inicia sesión en Docker Hub en la EC2
+            docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_TOKEN }}
+            # Descarga la última imagen del backend
+            docker pull ${{ secrets.DOCKER_USERNAME }}/back-ev2:latest
+            # Detiene el contenedor actual (si existe)
+            docker stop backend-api || true
+            # Elimina el contenedor actual (si existe)
+            docker rm backend-api || true
+            # Inicia el nuevo contenedor con la imagen actualizada
+            docker run -d --name backend-api --network app-network --env-file /home/ec2-user/.env.backend -p 3000:3000 ${{ secrets.DOCKER_USERNAME }}/back-ev2:latest
+      # --- FIN DESPLIEGUE AUTOMÁTICO ---
